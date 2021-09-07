@@ -8,6 +8,7 @@ const Gpio = require('onoff').Gpio;
 ```
 ### GPIO pinmode 설정
 ```js
-const 제어할센서 = new Gpio(핀번호, '모드(in,out),'both')
+const 제어할센서 = new Gpio(핀번호, '모드(in,out)','edge(rising,both,falling,both')
+const btn = new Gpio(16, in, rising, {debounceTimeout:10});
 // 세번쨰 인자 'both' 상승/하락 인터럽트 에지 설정
 ```
