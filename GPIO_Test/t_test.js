@@ -18,9 +18,9 @@ btn.watch((err,value)=>{
 
     console.log(state);
     if(state !==-1){
-        led[state].writeSync(0);     
+        led[state].writeSync(Gpio.LOW);     
         state == 2 ? state=0:state++;
-        led[state].writeSync(1);
+        led[state].writeSync(Gpio.HIGH);
     }else
         ++state;
 });
