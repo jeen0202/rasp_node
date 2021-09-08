@@ -31,7 +31,22 @@ Gpio.unwatchAll() - 모든 interrupt 탐지 중단
 ```
 **할당해제**
 ```js
-Gpio.unexport() => 할당되어있던 Gpio 해제
+Gpio.unexport() // 할당되어있던 Gpio 해제
 ```
 
+**타이머 설정**
+```js
+setTimeout(함수, ms, 매개변수1...)
+// ms만큼 지연 후 함수(매개변수) 실행
+```
 
+**무한루프 설정**
+```js
+setInterval(함수,ms);
+//ms만큼 지연 후 함수를 무한 반복
+```
+**타이머의 설정/해제**
+```js
+.unref() // 타이머 해제
+.ref() //타이머 재실행
+```
