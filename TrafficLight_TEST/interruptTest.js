@@ -27,8 +27,9 @@ const offAll = _=>{
 const tLight = (startTime) => {
         let now = new Date();        
         let runningTime = (now-startTime)%17100;
+        console.log(runningTime);
         if(btn.readSync()==Gpio.HIGH){
-            process.emit('InterruptTest','test')
+            process.emit('InterruptTest')
             }
         if (runningTime >= 100 && runningTime<= 110){
             yellow.writeSync(low);
@@ -45,22 +46,30 @@ const tLight = (startTime) => {
         }
 }
 
-const runTraffic = _=>{
-    let start = new Date();
-    const intervalTraffic = setInterval(tLight,10,start);
-    intervalTraffic;
+const runTraffic = setInterval(tLight,10,(new Date()));
 
+const bLight = _=>{    
+    offAll();    
+    const iv = setInterval(_=>yellow.writeSync(yellow.readSync()^1),200);
+    setTimeout(_=>{        
+        clearInterval(iv);  
+        setInterval(tLight,10,(new Date()))                   
+    },5000)
 }
+
 process.on('SIGINT', () => {
     offAll()
     process.exit()
 })
-process.on('InterruptTest', (arg) => {
+
+process.on('InterruptTest', async () => {
     offAll();
-    //intervalTraffic.unref(); 이부분에서 interval을 끊었다가 재실행
-    console.log('Button Pressed '+arg)
-    process.exit();
+    clearInterval(runTraffic);    
+    await bLight();              
+    //process.exit();
 })
+
+
 offAll();
 //tLight()
-runTraffic();
+runTraffic;
