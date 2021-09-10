@@ -12,6 +12,10 @@ let low = Gpio.LOW;
 
 const btn = new Gpio(16, 'in', 'rising',{debounceTimeout:10});
 
+let isStop = false;
+let isPushed = false;
+let start = new Date();
+
 const sleep = (time) => {
     return new Promise((resolve)=>{
         setTimeout(resolve,time)
@@ -24,37 +28,47 @@ const offAll = _=>{
     green.writeSync(low);
 }
 
-const tLight = (startTime) => {
-        let now = new Date();        
-        let runningTime = (now-startTime)%17100;
-        console.log(runningTime);
-        if(btn.readSync()==Gpio.HIGH){
-            process.emit('InterruptTest')
+const tLight = _ => {
+        let now = new Date();
+        let runningTime = (now-start)%17100;         
+        if(!isStop){         
+            console.log(runningTime);                    
+            if(btn.readSync()==Gpio.HIGH){
+                isStop = true;                         
+                }
+            else if (runningTime >= 100 && runningTime<= 110){
+                yellow.writeSync(low);
+                red.writeSync(high);
             }
-        if (runningTime >= 100 && runningTime<= 110){
-            yellow.writeSync(low);
-            red.writeSync(high);
-        }
-        else if(runningTime >= 5000 && runningTime <= 5010){
-            red.writeSync(low);
-            yellow.writeSync(low);
-            green.writeSync(high);
-        }    
-        else if(runningTime >= 15000 && runningTime <= 15010){
-        green.writeSync(low);
-        yellow.writeSync(high);
+            else if(runningTime >= 5000 && runningTime <= 5010){
+                red.writeSync(low);
+                yellow.writeSync(low);
+                green.writeSync(high);
+            }    
+            else if(runningTime >= 15000 && runningTime <= 15010){
+            green.writeSync(low);
+            yellow.writeSync(high);
+            }
+        }else{
+            if(isPushed == false){    
+            offAll();
+            yellow.writeSync(high); //실행시킬 함수부           
+            setTimeout(_=>{                
+                yellow.writeSync(low);
+                red.writeSync(high);
+                start = new Date();
+                isStop = false;
+                isPushed = false;
+                },5000)
+                isPushed = true;
+            }
         }
 }
 
-const runTraffic = setInterval(tLight,10,(new Date()));
+const runTraffic = setInterval(tLight,10,start);
 
-const bLight = _=>{    
-    offAll();    
-    const iv = setInterval(_=>yellow.writeSync(yellow.readSync()^1),200);
-    setTimeout(_=>{        
-        clearInterval(iv);  
-        setInterval(tLight,10,(new Date()))                   
-    },5000)
+const bLight  = _=>{    
+    offAll();
 }
 
 process.on('SIGINT', () => {
@@ -62,14 +76,7 @@ process.on('SIGINT', () => {
     process.exit()
 })
 
-process.on('InterruptTest', async () => {
-    offAll();
-    clearInterval(runTraffic);    
-    await bLight();              
-    //process.exit();
-})
 
 
 offAll();
-//tLight()
 runTraffic;
