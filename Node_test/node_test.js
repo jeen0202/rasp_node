@@ -1,40 +1,51 @@
+'use strict';
+
 let start = new Date();
+let stopTime;
 let isStop = false;
 
-const testLoop = _ => {
-    let now = new Date();
-    let runtime = (now-start);
-    if(runtime >=10000 && runtime <= 11000){
-        isStop = true;
-    }       
+const testLoop = _ => {   
+    let now = new Date(); 
     if(!isStop) {
-        console.clear();
-        console.log("now in Loop\ntime:"+runtime);
-    }
-    else{
-        //interrupt 실행부
-        // stopLoop;       
-        // intervalCheckout;
+        //Loop 실행부         
+        loop(now);
+    }else{
+        //Interrupt 실행부              
+        checkout(stopTime);
     }
     
 }
-const intervalLoop = setInterval(testLoop,1000);
-const stopLoop = _=> clearInterval(intervalLoop);
 
-const checkout = (stopTime) => {
-    let now = new Date();
-    if(now-stopTime >=5000 && now-stopTime <=6000){
-        isStop = false;
-        start = now;
-        stopCheckout;
-        intervalLoop; 
+const loop = (now) => {    
+    let runtime = (now-start);
+    if(runtime >=10000 && runtime <= 11000){
+        isStop = true;
+        stopTime = now;
+        //stopLoop();
+        //testLoop();
     }else{
-        console.clear();
-        console.log("now interrupted...")
+        console.log('now Loop \n time : ', runtime)
     }
 }
 
-const intervalCheckout = setInterval(checkout,1000);
+const checkout = (stopTime) => {
+    let now = new Date();
+    let runtime = now-stopTime;
+    if(runtime >=5000 && runtime <=6000){
+        isStop = false;
+        start = now;
+        //stopCheckout();
+        //testLoop();
+    }else{                   
+        console.log("now interrupted...\n runtime : ",runtime);
+    }
+}
+//const intervalLoop = setInterval(testLoop,1000);
+const stopLoop = _=> clearInterval(intervalLoop);
+
+
+
+//const intervalCheckout = setInterval(checkout,500,(new Date()));
 const stopCheckout = _=> clearInterval(intervalCheckout);
 
-intervalLoop;
+setInterval(testLoop, 1000);
