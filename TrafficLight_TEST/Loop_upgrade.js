@@ -18,18 +18,20 @@ let start = new Date();
 let stopTime;
 let isStop = false;
 
-const loop1 = _ =>{
-    yellow.writeSync(low);
-    red.writeSync(high);
-}
-const loop2 = _ =>{
+const offAll = _=>{
     red.writeSync(low);
     yellow.writeSync(low);
-    green.writeSync(high);
-}
-const loop3 = _ =>{
     green.writeSync(low);
-    yellow.writeSync(high);
+}
+
+const loop = (now) => {    
+    let runtime = (now-start);
+    if(btn.readSync()==Gpio.HIGH){
+        isStop = true;    
+        stopTime = now;
+        offAll();                     
+    }
+    !isStop?traffic(runtime):checkout();       
 }
 
 const traffic = runtime =>{
@@ -45,38 +47,49 @@ const traffic = runtime =>{
     console.log(`runtime ${runtime}`); 
 }
 
-const loop = (now) => {    
-    let runtime = (now-start);
-    if(btn.readSync()==Gpio.HIGH){
-        isStop = true;    
-        stopTime = now;                     
-    }
-    !isStop?traffic(runtime):checkout();       
-}
-
 const checkout = (stopTime) => {
     let now = new Date();
     let runtime = now-stopTime;
-    if(runtime >=5000 && runtime <=6000){
-        isStop = false;
-        start = now;
-        //stopCheckout();
-        //testLoop();
-    }else{    
-        console.clear();               
-        console.log("now interrupted...\n runtime : ",runtime);
-    }
+    (runtime >=5000 && runtime <=5100)?
+    returntoLoop(now):
+    blink(runtime);
 }
 
+
+const blink = (runtime)=>{
+    console.clear();
+    runtime%500<=50?
+    yellow.writeSync(yellow.readSync()^1):    
+    console.log(`checkout : ${runtime}`);
+}
+
+const loop1 = _ =>{
+    yellow.writeSync(low);
+    red.writeSync(high);
+}
+const loop2 = _ =>{
+    red.writeSync(low);
+    yellow.writeSync(low);
+    green.writeSync(high);
+}
+const loop3 = _ =>{
+    green.writeSync(low);
+    yellow.writeSync(high);
+}
+
+const returntoLoop = (now)=>{
+    isStop = false;
+    start = now;
+}
 const testLoop = _ => {   
     let now = new Date(); 
     !isStop?loop(now):checkout(stopTime);   
 }
-const offAll = _=>{
-    red.writeSync(low);
-    yellow.writeSync(low);
-    green.writeSync(low);
-}
+
+process.on('SIGINT', () => {
+    offAll()
+    process.exit()
+})
 
 offAll();
 setInterval(testLoop, 100);
