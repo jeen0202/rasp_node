@@ -18,12 +18,13 @@ let start = new Date();
 let stopTime;
 let isStop = false;
 
+//GPIO 초기화
 const offAll = _=>{
     red.writeSync(low);
     yellow.writeSync(low);
     green.writeSync(low);
 }
-
+//loop 본문
 const loop = (now) => {    
     let runtime = (now-start);
     if(btn.readSync()==Gpio.HIGH){
@@ -33,7 +34,12 @@ const loop = (now) => {
     }
     !isStop?traffic(runtime):checkout();       
 }
-
+//interval 설정
+const testLoop = _ => {   
+    let now = new Date(); 
+    !isStop?loop(now):checkout(stopTime);   
+}
+//기본 loop 조건문
 const traffic = runtime =>{
     console.clear();
     (runtime >= 200 && runtime <=300)?
@@ -46,7 +52,7 @@ const traffic = runtime =>{
     start=new Date():
     console.log(`runtime ${runtime}`); 
 }
-
+//interrupt 조건문
 const checkout = (stopTime) => {
     let now = new Date();
     let runtime = now-stopTime;
@@ -55,7 +61,7 @@ const checkout = (stopTime) => {
     blink(runtime);
 }
 
-
+//interrupt 본문
 const blink = (runtime)=>{
     console.clear();
     runtime%500<=50?
@@ -63,6 +69,7 @@ const blink = (runtime)=>{
     console.log(`checkout : ${runtime}`);
 }
 
+// 조건에 따른 실행문 구분
 const loop1 = _ =>{
     yellow.writeSync(low);
     red.writeSync(high);
@@ -77,15 +84,12 @@ const loop3 = _ =>{
     yellow.writeSync(high);
 }
 
+//interrupt 종료문
 const returntoLoop = (now)=>{
     isStop = false;
     start = now;
 }
-const testLoop = _ => {   
-    let now = new Date(); 
-    !isStop?loop(now):checkout(stopTime);   
-}
-
+//소멸자
 process.on('SIGINT', () => {
     offAll()
     process.exit()
